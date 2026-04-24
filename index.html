@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prompt Architect</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Cabinet+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --lime:     #C9F53A;
+  --coral:    #FF4C35;
+  --coral-bg: #FFF1EE;
+  --sky:      #00AAFF;
+  --sky-bg:   #EAF7FF;
+  --amber:    #FF9500;
+  --amber-bg: #FFF8EC;
+  --green:    #18B869;
+  --green-bg: #EDFFF4;
+  --ink:      #111111;
+  --ink2:     #444444;
+  --ink3:     #888888;
+  --page:     #F4F2EC;
+  --white:    #FFFFFF;
+  --border:   rgba(0,0,0,0.09);
+  --border-md:rgba(0,0,0,0.14);
+  --r:        16px;
+  --r-sm:     10px;
+}
+
+body {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  background: var(--page);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+header {
+  background: var(--ink);
+  height: 68px;
+  display: flex; align-items: center;
+  padding: 0 36px;
+  position: sticky; top: 0; z-index: 50; flex-shrink: 0;
+}
+.brand { display: flex; align-items: center; gap: 13px; flex: 1; }
+.brand-mark {
+  width: 36px; height: 36px; background: var(--lime);
+  border-radius: 9px; display: grid; place-items: center;
+}
+.brand-mark svg { width: 18px; height: 18px; }
+.brand-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 19px; font-weight: 800; color: var(--white); letter-spacing: -0.3px;
+}
+.brand-name em { font-style: normal; color: var(--lime); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.session-label { font-size: 13px; font-weight: 500; color: #666; }
+.session-val {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 13px; font-weight: 700; color: #AAA; letter-spacing: 0.5px;
+}
+.btn-new {
+  background: #1E1E1E; border: 1px solid #333; color: #AAA;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700; padding: 7px 16px; border-radius: 20px;
+  cursor: pointer; transition: background 0.15s, color 0.15s;
+  display: flex; align-items: center; gap: 7px;
+}
+.btn-new:hover { background: var(--lime); color: var(--ink); border-color: var(--lime); }
+
+/* MAIN */
+main {
+  flex: 1; display: grid; grid-template-columns: 400px 1fr;
+  min-height: calc(100vh - 68px);
+}
+
+/* LEFT */
+.left {
+  background: var(--white);
+  border-right: 1.5px solid var(--border-md);
+  display: flex; flex-direction: column;
+}
+.left-hero {
+  padding: 36px 32px 28px;
+  border-bottom: 1.5px solid var(--border);
+}
+.hero-eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 14px;
+}
+.hero-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 36px; font-weight: 800; line-height: 1.08;
+  letter-spacing: -1.5px; color: var(--ink); margin-bottom: 12px;
+}
+.hero-title span { color: var(--coral); }
+.hero-desc { font-size: 15px; font-weight: 500; color: var(--ink3); line-height: 1.6; }
+
+#api-base { display: none; }
+
+.left-form {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 28px 32px; gap: 22px;
+}
+.field-label {
+  display: block;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  margin-bottom: 9px; letter-spacing: -0.2px;
+}
+textarea {
+  width: 100%; min-height: 160px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 16px; font-weight: 500; color: var(--ink);
+  background: var(--page); border: 1.5px solid var(--border-md);
+  border-radius: var(--r-sm); padding: 16px 18px; outline: none;
+  resize: none; line-height: 1.6;
+  transition: border-color 0.15s, background 0.15s;
+}
+/* Complexity Select Menu */
+.complexity-select {
+  width: 100%;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 16px; font-weight: 500; color: var(--ink);
+  background: var(--page); border: 1.5px solid var(--border-md);
+  border-radius: var(--r-sm); padding: 14px 18px; outline: none;
+  cursor: pointer; 
+  appearance: none; /* Removes default browser styling */
+  /* Custom arrow matching your dark ink color */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23111111%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px top 50%;
+  background-size: 12px auto;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.complexity-select:focus {
+  border-color: var(--sky); background: var(--white);
+}
+textarea::placeholder { color: #BBBBBB; }
+textarea:focus { border-color: var(--sky); background: var(--white); }
+.char-hint {
+  font-size: 13px; color: #CCCCCC; font-weight: 500;
+  margin-top: 6px; text-align: right;
+}
+.run-btn {
+  width: 100%; height: 58px;
+  background: var(--ink); color: var(--lime);
+  border: none; border-radius: var(--r-sm);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px; font-weight: 800; letter-spacing: -0.3px;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 12px;
+  transition: background 0.15s, transform 0.1s; margin-top: auto;
+}
+.run-btn:hover { background: #1A1A1A; }
+.run-btn:active { transform: scale(0.985); }
+.run-btn:disabled { background: #DDDDDD; color: #AAAAAA; cursor: not-allowed; }
+.play {
+  width: 28px; height: 28px; background: var(--lime);
+  border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+}
+.run-btn:disabled .play { background: #CCCCCC; }
+.play svg { width: 10px; height: 10px; fill: var(--ink); }
+
+/* RIGHT */
+.right { display: flex; flex-direction: column; overflow: hidden; }
+
+/* PROGRESS BAR */
+.prog-bar {
+  background: var(--white); border-bottom: 1.5px solid var(--border-md);
+  padding: 16px 32px; display: flex; align-items: center; gap: 6px;
+  overflow-x: auto; flex-shrink: 0;
+}
+.prog-step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-radius: 24px;
+  background: var(--page); border: 1.5px solid var(--border-md);
+  white-space: nowrap;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: #CCCCCC;
+  transition: all 0.3s ease;
+}
+.prog-step.active { background: var(--sky-bg); border-color: var(--sky); color: #0077BB; }
+.prog-step.done   { background: var(--green-bg); border-color: var(--green); color: #0E7A45; }
+.prog-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #CCCCCC; flex-shrink: 0; transition: background 0.3s;
+}
+.prog-step.active .prog-dot { background: var(--sky); animation: blink 1.1s infinite; }
+.prog-step.done   .prog-dot { background: var(--green); animation: none; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.prog-arrow { font-size: 18px; color: #DDDDDD; font-weight: 700; flex-shrink: 0; }
+
+/* OUTPUT */
+.output-area {
+  flex: 1; overflow-y: auto;
+  padding: 36px 40px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.empty-state {
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+}
+.empty-icon {
+  width: 70px; height: 70px; border-radius: 50%;
+  background: var(--white); border: 2px dashed #DDDDDD;
+  display: grid; place-items: center; font-size: 26px;
+}
+.empty-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 22px; font-weight: 800; color: #CCCCCC; letter-spacing: -0.5px;
+}
+.empty-sub { font-size: 15px; font-weight: 500; color: #DDDDDD; }
+
+/* THREAD */
+.thread { display: flex; flex-direction: column; gap: 24px; }
+
+/* User question bubble */
+.bubble-user {
+  align-self: flex-end; max-width: 72%;
+  background: var(--ink); color: var(--white);
+  border-radius: 20px 20px 4px 20px;
+  padding: 18px 22px;
+  font-size: 16px; font-weight: 500; line-height: 1.6;
+  animation: rise 0.2s ease;
+}
+
+/* AI question block */
+.ai-block {
+  width: 100%;
+  align-self: flex-start; max-width: 90%;
+  background: var(--white); border: 1.5px solid var(--border-md);
+  border-radius: 4px 20px 20px 20px;
+  padding: 24px 26px;
+  animation: rise 0.25s ease;
+}
+.ai-sender {
+  display: flex; align-items: center; gap: 9px; margin-bottom: 20px;
+}
+.ai-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--lime); display: grid; place-items: center; flex-shrink: 0;
+}
+.ai-avatar svg { width: 12px; height: 12px; }
+.ai-sender-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 14px; font-weight: 800; color: var(--ink3);
+}
+
+.q-divider { height: 1.5px; background: var(--border); margin: 20px 0; }
+
+.q-item {}
+.q-text {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--ink);
+  letter-spacing: -0.3px; line-height: 1.35; margin-bottom: 14px;
+}
+
+/* option chips */
+.opt-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.opt-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 24px;
+  background: var(--page); border: 1.5px solid var(--border-md);
+  font-size: 14px; font-weight: 600; color: var(--ink2);
+  cursor: pointer; transition: all 0.15s;
+}
+.opt-chip:hover { border-color: var(--sky); background: var(--sky-bg); color: #0077BB; }
+.opt-chip.chosen { background: var(--ink); border-color: var(--ink); color: var(--lime); }
+.opt-key {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 11px; font-weight: 800;
+  width: 20px; height: 20px; border-radius: 5px;
+  background: rgba(0,0,0,0.07); color: var(--ink3);
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.opt-chip.chosen .opt-key { background: rgba(255,255,255,0.18); color: var(--lime); }
+
+.ans-label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--ink3); margin-bottom: 8px;
+}
+.ans-field {
+  width: 100%;
+  min-height: 45%;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 16px; font-weight: 500; color: var(--ink);
+  background: var(--page); border: 2px solid var(--border-md);
+  border-radius: var(--r-sm); padding: 14px 18px; outline: none;
+  resize: none; line-height: 1.5;
+  transition: border-color 0.15s, background 0.15s;
+}
+.ans-field:focus { border-color: var(--amber); background: var(--white); }
+.ans-field::placeholder { color: #CCCCCC; font-weight: 500; }
+
+.btn-continue {
+  margin-top: 22px; height: 52px;
+  background: var(--ink); color: var(--lime);
+  border: none; border-radius: var(--r-sm);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 16px; font-weight: 800; letter-spacing: -0.2px;
+  cursor: pointer; padding: 0 36px;
+  display: flex; align-items: center; gap: 10px;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-continue:hover { background: #1A1A1A; }
+.btn-continue:active { transform: scale(0.98); }
+.btn-continue:disabled { background: #DDD; color: #AAA; cursor: not-allowed; }
+
+/* User answer bubbles */
+.bubble-answers {
+  align-self: flex-end; max-width: 48%;
+  display: flex; flex-direction: column; gap: 10px;
+  animation: rise 0.2s ease;
+}
+.ans-bubble {
+  background: var(--sky-bg); border: 1.5px solid var(--sky);
+  border-radius: 16px 16px 4px 16px;
+  padding: 14px 18px;
+}
+.ans-bubble-q {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--sky); margin-bottom: 5px;
+}
+.ans-bubble-v { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+
+/* Final answer */
+.final-block {
+  width: 100%;
+  align-self: flex-start; max-width: 92%;
+  background: var(--white); border: 1.5px solid var(--border-md);
+  border-top: 3px solid var(--green);
+  border-radius: 4px 20px 20px 20px;
+  padding: 26px 28px; animation: rise 0.3s ease;
+}
+.final-sender {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+}
+.final-done-badge {
+  background: var(--green); color: var(--white);
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+}
+.final-sender-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 14px; font-weight: 800; color: var(--ink3);
+}
+.final-body {
+  font-size: 16px; font-weight: 500; color: var(--ink);
+  line-height: 1.8; white-space: pre-wrap; word-break: break-word;
+}
+
+/* Error */
+.error-block {
+  align-self: flex-start; max-width: 80%;
+  background: var(--coral-bg); border: 1.5px solid var(--coral);
+  border-radius: 4px 16px 16px 16px;
+  padding: 16px 20px; animation: rise 0.2s ease;
+}
+.error-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 16px; font-weight: 800; color: var(--coral); margin-bottom: 5px;
+}
+.error-body { font-size: 14px; font-weight: 500; color: #AA3322; line-height: 1.5; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* BOTTOM BAR */
+.bottom-bar {
+  background: var(--white); border-top: 1.5px solid var(--border-md);
+  padding: 14px 32px; display: flex; align-items: center; gap: 28px; flex-shrink: 0;
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -1px; line-height: 1;
+}
+.stat-lbl {
+  font-size: 11px; font-weight: 700; color: #BBBBBB;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.stat-div { width: 1.5px; height: 34px; background: var(--border-md); }
+.status-chip {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 9px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 14px; font-weight: 800; letter-spacing: -0.2px;
+  padding: 9px 18px; border-radius: 24px;
+  border: 1.5px solid var(--border-md); background: var(--page); color: #BBBBBB;
+  transition: all 0.2s;
+}
+.status-chip.running  { color: var(--sky);   border-color: var(--sky);   background: var(--sky-bg); }
+.status-chip.waiting  { color: var(--amber);  border-color: var(--amber); background: var(--amber-bg); }
+.status-chip.complete { color: var(--green);  border-color: var(--green); background: var(--green-bg); }
+.status-chip.error    { color: var(--coral);  border-color: var(--coral); background: var(--coral-bg); }
+.chip-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.spinner {
+  width: 14px; height: 14px;
+  border: 2.5px solid currentColor; border-top-color: transparent;
+  border-radius: 50%; animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 18 18" fill="none">
+        <polygon points="9,1 17,9 9,17 1,9" fill="#111"/>
+        <circle cx="9" cy="9" r="3.5" fill="#C9F53A"/>
+      </svg>
+    </div>
+    <div class="brand-name">Prompt <em>Architect</em></div>
+  </div>
+  <div class="header-right">
+    <span class="session-label">Session:</span>
+    <span class="session-val" id="header-session">—</span>
+    <button class="btn-new" onclick="newSession()">↺ New Session</button>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT -->
+  <div class="left">
+    <div class="left-hero">
+      <div class="hero-eyebrow">AI Prompt Tool</div>
+      <div class="hero-title">Ask<br><span>anything.</span></div>
+      <div class="hero-desc">Type your question and let Prompt Architect think it through — step by step.</div>
+    </div>
+    <div class="left-form">
+      <input type="text" id="api-base" value="http://localhost:8000" />
+      <div>
+        <label class="field-label" for="user-question">Your Question</label>
+        <textarea id="user-question"
+          placeholder="e.g. What is the best way to structure a machine learning pipeline?"
+          oninput="updateChar()" maxlength="2000"></textarea>
+        <div class="char-hint"><span id="char-count">0</span> / 2000</div>
+      </div>
+
+      <div>
+        <label class="field-label" for="prompt-complexity">Complexity Level</label>
+        <select id="prompt-complexity" class="complexity-select">
+          <option value="simple">Basic (Quick Overview)</option>
+          <option value="detailed" selected>Moderate (Step-by-Step)</option>
+          <option value="expert">Deep (Deep Technical Dive)</option>
+        </select>
+      </div>
+
+      <button class="run-btn" id="run-btn" onclick="startRun()">
+        <div class="play"><svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg></div>
+        Get Answer
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="prog-bar" id="prog-bar">
+      <div class="prog-step" data-key="thinking"><div class="prog-dot"></div>Thinking</div>
+      <div class="prog-arrow">›</div>
+      <div class="prog-step" data-key="searching"><div class="prog-dot"></div>Searching</div>
+      <div class="prog-arrow">›</div>
+      <div class="prog-step" data-key="review"><div class="prog-dot"></div>Reviewing</div>
+      <div class="prog-arrow">›</div>
+      <div class="prog-step" data-key="answer"><div class="prog-dot"></div>Answer Ready</div>
+    </div>
+
+    <div class="output-area" id="output-area">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">✦</div>
+        <div class="empty-title">Ready when you are</div>
+        <div class="empty-sub">Type your question on the left to get started</div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="stat">
+        <div class="stat-num" id="stat-steps">0</div>
+        <div class="stat-lbl">Steps</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <div class="stat-num" id="stat-time">0s</div>
+        <div class="stat-lbl">Time</div>
+      </div>
+      <div class="status-chip" id="status-chip">
+        <div class="chip-dot"></div>Ready
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  let steps = 0, timerRef = null, startTime = null;
+  let answers = {}, questions = [], sessionId = '', thread = null;
+
+  function makeId() { return 'S-' + Math.random().toString(36).substr(2,6).toUpperCase(); }
+
+  function newSession() {
+    sessionId = makeId();
+    document.getElementById('header-session').textContent = sessionId;
+    clearAll();
+  }
+
+  function updateChar() {
+    document.getElementById('char-count').textContent =
+      document.getElementById('user-question').value.length;
+  }
+
+  function setStatus(state, label) {
+    const c = document.getElementById('status-chip');
+    c.className = 'status-chip ' + state;
+    c.innerHTML = (state === 'running' ? '<div class="spinner"></div>' : '<div class="chip-dot"></div>') + label;
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timerRef = setInterval(() => {
+      document.getElementById('stat-time').textContent =
+        ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+    }, 100);
+  }
+
+  function stopTimer() { if (timerRef) { clearInterval(timerRef); timerRef = null; } }
+
+  function clearAll() {
+    steps = 0; answers = {}; questions = []; thread = null;
+    document.getElementById('stat-steps').textContent = '0';
+    document.getElementById('stat-time').textContent = '0s';
+    document.getElementById('output-area').innerHTML =
+      '<div class="empty-state" id="empty-state" style="display:none;"></div>';
+    document.querySelectorAll('.prog-step').forEach(s => s.classList.remove('active','done'));
+    stopTimer();
+    document.getElementById('run-btn').disabled = false;
+    setStatus('', 'Ready');
+  }
+
+  function advanceProgress(node) {
+    const all = document.querySelectorAll('.prog-step');
+    all.forEach(s => { if (s.classList.contains('active')) s.classList.replace('active','done'); });
+    let hit = false;
+    all.forEach(s => {
+      if (!hit && s.dataset.key && node.toLowerCase().includes(s.dataset.key)) {
+        s.classList.add('active'); hit = true;
+      }
+    });
+    if (!hit) {
+      for (const s of all) {
+        if (!s.classList.contains('done') && !s.classList.contains('active')) {
+          s.classList.add('active'); break;
+        }
+      }
+    }
+  }
+
+  function getThread() {
+    const area = document.getElementById('output-area');
+    const es = document.getElementById('empty-state');
+    if (es) es.style.display = 'none';
+    if (!thread) { thread = document.createElement('div'); thread.className = 'thread'; area.appendChild(thread); }
+    return thread;
+  }
+
+  function append(el) {
+    getThread().appendChild(el);
+    const area = document.getElementById('output-area');
+    area.scrollTop = area.scrollHeight;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* User bubble */
+  function addUserBubble(text) {
+    const el = document.createElement('div');
+    el.className = 'bubble-user';
+    el.textContent = text;
+    append(el);
+  }
+
+  /* AI questions */
+  function showQuestions(qs) {
+    questions = qs; answers = {};
+    const block = document.createElement('div');
+    block.className = 'ai-block'; block.id = 'ai-block';
+
+    let html = `<div class="ai-sender">
+      <div class="ai-avatar"><svg viewBox="0 0 12 12" fill="none">
+        <polygon points="6,0.5 11.5,6 6,11.5 0.5,6" fill="#111"/>
+        <circle cx="6" cy="6" r="2.2" fill="#C9F53A"/>
+      </svg></div>
+      <div class="ai-sender-name">Prompt Architect</div>
+    </div>`;
+
+    qs.forEach((q, i) => {
+      const qid = q.id || `q${i}`;
+      const opts = q.options || q.choices || [];
+      const qText = q.question || q.text || JSON.stringify(q);
+      if (i > 0) html += `<div class="q-divider"></div>`;
+
+      let chipsHtml = '';
+      if (opts.length) {
+        chipsHtml = `<div class="opt-chips">` + opts.map((o, oi) => {
+          const lbl = typeof o === 'string' ? o : (o.text || JSON.stringify(o));
+          const key = String.fromCharCode(65 + oi);
+          return `<div class="opt-chip" data-qid="${qid}"
+            onclick="pickChip('${qid}','${lbl.replace(/'/g,"\\'")}',this)">
+            <span class="opt-key">${key}</span>${esc(lbl)}
+          </div>`;
+        }).join('') + `</div>`;
+      }
+
+      html += `<div class="q-item">
+        <div class="q-text">${i+1}. ${esc(qText)}</div>
+        ${chipsHtml}
+        <div class="ans-label">Your Answer</div>
+        <textarea class="ans-field" id="ans-${qid}" rows="2"
+          placeholder="Type your answer…"
+          oninput="onType('${qid}',this.value)"></textarea>
+      </div>`;
+    });
+
+    html += `<button class="btn-continue" id="continue-btn" onclick="submitAnswers()" disabled>
+      Continue &rarr;
+    </button>`;
+    block.innerHTML = html;
+    append(block);
+    setStatus('waiting', 'Needs input');
+  }
+
+  function onType(qid, val) {
+    if (val.trim()) {
+      answers[qid] = val.trim();
+      document.querySelectorAll(`.opt-chip[data-qid="${qid}"]`).forEach(c => c.classList.remove('chosen'));
+    } else { delete answers[qid]; }
+    checkReady();
+  }
+
+  function pickChip(qid, val, el) {
+    document.querySelectorAll(`.opt-chip[data-qid="${qid}"]`).forEach(c => c.classList.remove('chosen'));
+    el.classList.add('chosen');
+    answers[qid] = val;
+    const f = document.getElementById(`ans-${qid}`);
+    if (f) f.value = val;
+    checkReady();
+  }
+
+  function checkReady() {
+    const btn = document.getElementById('continue-btn');
+    if (btn) btn.disabled = Object.keys(answers).length < questions.length;
+  }
+
+  /* Answer bubbles */
+  function addAnswerBubbles() {
+    const wrap = document.createElement('div'); wrap.className = 'bubble-answers';
+    questions.forEach((q, i) => {
+      const qid = q.id || `q${i}`;
+      const qText = q.question || q.text || `Question ${i+1}`;
+      const item = document.createElement('div'); item.className = 'ans-bubble';
+      item.innerHTML = `<div class="ans-bubble-q">${esc(qText)}</div>
+        <div class="ans-bubble-v">${esc(answers[qid] || '—')}</div>`;
+      wrap.appendChild(item);
+    });
+    append(wrap);
+  }
+
+  /* Final answer */
+  function showFinal(output) {
+    const txt = typeof output === 'object' ? JSON.stringify(output, null, 2) : (output || 'No answer was generated.');
+    const el = document.createElement('div'); el.className = 'final-block';
+    el.innerHTML = `<div class="final-sender">
+      <div class="ai-avatar"><svg viewBox="0 0 12 12" fill="none">
+        <polygon points="6,0.5 11.5,6 6,11.5 0.5,6" fill="#111"/>
+        <circle cx="6" cy="6" r="2.2" fill="#C9F53A"/>
+      </svg></div>
+      <div class="final-done-badge">✓ Done</div>
+      <div class="final-sender-name">Prompt Architect</div>
+    </div>
+    <div class="final-body">${esc(txt)}</div>`;
+    append(el);
+  }
+
+  /* Error */
+  function showError(msg) {
+    const el = document.createElement('div'); el.className = 'error-block';
+    el.innerHTML = `<div class="error-title">Something went wrong</div>
+      <div class="error-body">${esc(msg)}</div>`;
+    append(el);
+  }
+
+  /* Submit answers */
+  async function submitAnswers() {
+    const btn = document.getElementById('continue-btn');
+    if (btn) btn.disabled = true;
+    const ab = document.getElementById('ai-block');
+    if (ab) { ab.style.opacity = '0.5'; ab.style.pointerEvents = 'none'; }
+
+    addAnswerBubbles();
+    setStatus('running', 'Thinking');
+
+    const base = document.getElementById('api-base').value.trim().replace(/\/$/,'');
+    try {
+      const res = await fetch(`${base}/resume_stream`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_id: sessionId, answers })
+      });
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      await readStream(res);
+    } catch(e) {
+      showError(e.message);
+      setStatus('error', 'Error');
+      stopTimer();
+      document.getElementById('run-btn').disabled = false;
+    }
+  }
+
+  /* Stream reader */
+  async function readStream(res) {
+    const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+    while (true) {
+      const { done, value } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue;
+        const raw = line.slice(5).trim(); if (!raw) continue;
+        let evt; try { evt = JSON.parse(raw); } catch { continue; }
+
+        if (evt.type === 'node_complete') {
+          steps++; document.getElementById('stat-steps').textContent = steps;
+          advanceProgress(evt.node);
+        } else if (evt.type === 'resuming-node') {
+          steps++; document.getElementById('stat-steps').textContent = steps;
+          const n = typeof evt.node === 'object' ? Object.keys(evt.node)[0] : String(evt.node);
+          advanceProgress(n);
+        } else if (evt.type === 'interrupt') {
+          showQuestions(evt.questions || []); return;
+        } else if (evt.type === 'final_result') {
+          stopTimer();
+          document.querySelectorAll('.prog-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+          showFinal(evt.output);
+          setStatus('complete', 'Done');
+          document.getElementById('run-btn').disabled = false;
+          return;
+        }
+      }
+    }
+    stopTimer(); setStatus('complete', 'Done');
+    document.getElementById('run-btn').disabled = false;
+  }
+
+  /* Start */
+  async function startRun() {
+    const q = document.getElementById('user-question').value.trim();
+    const complexityLevel = document.getElementById('prompt-complexity').value;
+
+    if (!q) { document.getElementById('user-question').focus(); return; }
+    clearAll();
+    document.getElementById('run-btn').disabled = true;
+    setStatus('running', 'Thinking');
+    startTimer();
+    advanceProgress('thinking');
+    addUserBubble(q);
+
+    const base = document.getElementById('api-base').value.trim().replace(/\/$/,'');
+    try {
+      const res = await fetch(`${base}/stream`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q, thread_id: sessionId, complexity: complexityLevel })
+      });
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      await readStream(res);
+    } catch(e) {
+      showError(e.message + ' — make sure the server is running.');
+      setStatus('error', 'Error');
+      stopTimer();
+      document.getElementById('run-btn').disabled = false;
+    }
+  }
+
+  // init
+  sessionId = makeId();
+  document.getElementById('header-session').textContent = sessionId;
+</script>
+</body>
+</html>
